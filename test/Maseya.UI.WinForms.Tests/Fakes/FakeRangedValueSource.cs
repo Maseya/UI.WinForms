@@ -1,4 +1,10 @@
-﻿
+﻿// <copyright file="FakeRangedValueSource.cs" organization="Maseya">
+//     Copyright (c) 2026 spel werdz rite (SWR).
+//     Licensed under the Mozilla Public License 2.0.
+//     See LICENSE in the project root for license information, or visit
+//     https://www.mozilla.org/MPL/2.0/.
+// </copyright>
+
 namespace Maseya.UI.WinForms.Tests.Fakes;
 
 using System;
