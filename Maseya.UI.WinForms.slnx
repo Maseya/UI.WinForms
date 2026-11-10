@@ -11,4 +11,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/Maseya.UI.WinForms/Maseya.UI.WinForms.csproj" />
+  <Project Path="test/Maseya.UI.WinForms.Tests/Maseya.UI.WinForms.Tests.csproj" Id="800cdd0a-cfe3-46cc-b667-bd8692ca792e" />
 </Solution>
