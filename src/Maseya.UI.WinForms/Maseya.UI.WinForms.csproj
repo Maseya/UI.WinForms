@@ -7,4 +7,27 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Debugging and Source Link -->
+    <DebugType>portable</DebugType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/Maseya/UI.WinForms</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- CI-only settings -->
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources Condition="'$(CI)' == 'true'">true</EmbedUntrackedSources>
+
+    <!-- Generate NuGet symbol packages in CI -->
+    <IncludeSymbols Condition="'$(CI)' == 'true'">true</IncludeSymbols>
+    <SymbolPackageFormat Condition="'$(CI)' == 'true'">snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.403">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
