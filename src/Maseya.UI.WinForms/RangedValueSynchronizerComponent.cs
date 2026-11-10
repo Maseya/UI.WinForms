@@ -47,6 +47,7 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
     private int _value = DefaultInitialValue;
 
     private bool _isSettingRange = false;
+    private bool _isSettingValue = false;
     private int _pendingValue = DefaultInitialValue;
     private int _dirtyValue = DefaultInitialValue;
 
@@ -148,12 +149,19 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
     {
         get
         {
-            return _value;
+            return _isSettingRange ? _dirtyValue : _value;
         }
 
         set
         {
-            SetValueInternal(Math.Clamp(value, Minimum, Maximum));
+            var newValue = Math.Clamp(value, Minimum, Maximum);
+            if (_isSettingRange)
+            {
+                _dirtyValue = newValue;
+                //return;
+            }
+
+            SetValueInternal(newValue);
         }
     }
 
@@ -257,23 +265,38 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
             return;
         }
 
+        var _currentValue = _isSettingRange ? _dirtyValue : _value;
+
         _isSettingRange = true;
-        _pendingValue = _dirtyValue = Math.Clamp(Value, min, max);
+        _pendingValue = _dirtyValue = Math.Clamp(_currentValue, min, max);
 
         _minimum = min;
         _maximum = max;
 
         Source1?.SetRange(min, max);
+        if (!_isSettingRange)
+        {
+            // A recursive SetRange call succeeded, making this invocation
+            // out of date. Do not make further changes.
+            goto _end;
+        }
+
         Source2?.SetRange(min, max);
+        if (!_isSettingRange)
+        {
+            goto _end;
+        }
+
+        SetValueInternal(Math.Clamp(_dirtyValue, Minimum, Maximum));
+        if (!_isSettingRange)
+        {
+            goto _end;
+        }
 
         _isSettingRange = false;
 
-        if (_pendingValue == _dirtyValue)
-        {
-            Value = _pendingValue;
-
-            OnRangeChanged(EventArgs.Empty);
-        }
+    _end:
+        OnRangeChanged(EventArgs.Empty);
     }
 
     /// <summary>
@@ -340,16 +363,24 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
     /// </remarks>
     private void SetValueInternal(int value)
     {
-        if (Value == value)
+        if (_value == value)
         {
             return;
         }
 
         _value = value;
+        _isSettingValue = true;
         Source1?.Value = value;
+        if (!_isSettingValue)
+        {
+            goto _end;
+        }
+
         Source2?.Value = value;
 
+    _end:
         OnValueChanged(EventArgs.Empty);
+        _isSettingValue = false;
     }
 
     /// <summary>
@@ -401,12 +432,8 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
         var rangeValueSource = (IRangedValueSource)sender!;
         if (_isSettingRange)
         {
-            if (rangeValueSource.Value == _pendingValue)
-            {
-                return;
-            }
-
             _dirtyValue = rangeValueSource.Value;
+            return;
         }
 
         Value = rangeValueSource.Value;
@@ -415,13 +442,6 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
     private void ValueSource_RangeChanged(object? sender, EventArgs e)
     {
         var rangeValueSource = (IRangedValueSource)sender!;
-        if (_isSettingRange && rangeValueSource.Minimum == Minimum &&
-            rangeValueSource.Maximum == Maximum)
-        {
-            return;
-        }
-
-        _isSettingRange = false;
         SetRange(rangeValueSource.Minimum, rangeValueSource.Maximum);
     }
 }

@@ -447,6 +447,270 @@ public class RangedValueSynchronizerComponentTests
     }
 
     [Fact]
+    public void SetRange_WhenSourceValueChangesDuringSynchronization_RaisesRangeChanged()
+    {
+        // Arrange
+        using var component = new RangedValueSynchronizerComponent();
+        var source = new FakeRangedValueSource();
+
+        component.Source1 = source;
+
+        // Change the source's value during its next range update.
+        source.RangeChanged += (_, _) => source.Value = 50;
+
+        var rangeChangedCount = 0;
+        component.RangeChanged += (_, _) => rangeChangedCount++;
+
+        // Act
+        component.SetRange(0, 100);
+
+        // Assert
+        Assert.Equal(1, rangeChangedCount);
+    }
+
+    [Fact]
+    public void SetRange_WhenSourceValueChangesDuringSynchronization_DefersPropagation()
+    {
+        using var component = new RangedValueSynchronizerComponent()
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Value = 0,
+        };
+
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+
+        var source2ValueWhenRangeUpdated = -1;
+
+        // Changing source1's value during range synchronization should not
+        // immediately propagate that value to source2.
+        source1.RangeChanged += (_, _) => source1.Value = 25;
+
+        // Capture source2's value when its range update completes to verify
+        // that it has not yet received source1's pending value.
+        source2.RangeChanged += (_, _) =>
+            source2ValueWhenRangeUpdated = source2.Value;
+
+        component.SetRange(0, 50);
+
+        // Both sources should retain their original value until range
+        // synchronization completes.
+        Assert.Equal(0, source2ValueWhenRangeUpdated);
+
+        // After synchronization, the pending value should be clamped to
+        // the new range and propagated to both sources.
+        Assert.Equal(25, component.Value);
+        Assert.Equal(25, source1.Value);
+        Assert.Equal(25, source2.Value);
+    }
+
+    [Fact]
+    public void SetRange_WhenSourceValueChangesDuringSynchronization_DefersValueChanged()
+    {
+        // Arrange
+        using var component = new RangedValueSynchronizerComponent();
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+
+        var source2RangeUpdated = false;
+        var valueChangedRaisedBeforeSource2RangeUpdated = false;
+
+        source1.RangeChanged += (_, _) => source1.Value = 50;
+        source2.RangeChanged += (_, _) => source2RangeUpdated = true;
+
+        component.ValueChanged += (_, _) =>
+        {
+            if (!source2RangeUpdated)
+            {
+                valueChangedRaisedBeforeSource2RangeUpdated = true;
+            }
+        };
+
+        // Act
+        component.SetRange(0, 100);
+
+        // Assert
+        Assert.False(valueChangedRaisedBeforeSource2RangeUpdated);
+        Assert.True(source2RangeUpdated);
+        Assert.Equal(50, component.Value);
+    }
+
+    [Fact]
+    public void SetRange_WhenSourceChangesRangeDuringSynchronization_RemainsConsistent()
+    {
+        // Arrange
+        using var component = new RangedValueSynchronizerComponent();
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+
+        // Change source1's range while the component is synchronizing its range.
+        source1.RangeChanged += (_, _) => source1.SetRange(10, 40);
+
+        // Act
+        component.SetRange(0, 50);
+
+        // Assert
+        Assert.Equal(10, component.Minimum);
+        Assert.Equal(40, component.Maximum);
+
+        Assert.Equal(10, source1.Minimum);
+        Assert.Equal(40, source1.Maximum);
+
+        Assert.Equal(10, source2.Minimum);
+        Assert.Equal(40, source2.Maximum);
+    }
+
+    [Fact]
+    public void SetRange_WhenSourceValueReturnsToPendingValue_UsesLatestValue()
+    {
+        // Arrange
+        using var component = new RangedValueSynchronizerComponent()
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Value = 75,
+        };
+
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+
+        // The first source reports a different value.
+        source1.RangeChanged += (_, _) => source1.Value = 25;
+
+        // The second source subsequently reports the original pending value.
+        source2.RangeChanged += (_, _) => source2.Value = 50;
+
+        // Act
+        component.SetRange(0, 50);
+
+        // Assert
+        // The last source notification should determine the final value,
+        // even though it matches the original pending value.
+        Assert.Equal(50, component.Value);
+        Assert.Equal(50, source1.Value);
+        Assert.Equal(50, source2.Value);
+    }
+
+    [Fact]
+    public void SetRange_WhenComponentValueChangesDuringSynchronization_ReadsBackLatestValue()
+    {
+        using var component = new RangedValueSynchronizerComponent();
+        var source = new FakeRangedValueSource();
+
+        component.Source1 = source;
+        component.Value = 75;
+
+        source.RangeChanged += (_, _) =>
+        {
+            component.Value = 25;
+            Assert.Equal(25, component.Value);
+        };
+
+        component.SetRange(0, 50);
+
+        Assert.Equal(25, component.Value);
+    }
+
+    [Fact]
+    public void SetRange_WhenNestedRangeChangeOccursAfterDeferredValueChange_PreservesLatestValue()
+    {
+        using var component = new RangedValueSynchronizerComponent();
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+        component.Value = 75;
+
+        source1.RangeChanged += (_, _) =>
+        {
+            component.Value = 25;
+            component.SetRange(0, 40);
+        };
+
+        component.SetRange(0, 50);
+
+        Assert.Equal(0, component.Minimum);
+        Assert.Equal(40, component.Maximum);
+        Assert.Equal(25, component.Value);
+        Assert.Equal(25, source1.Value);
+        Assert.Equal(25, source2.Value);
+    }
+
+    [Fact]
+    public void ComponentValueChange_WhenSourceSubscriberChangesOtherSource_RemainsConsistent()
+    {
+        using var component = new RangedValueSynchronizerComponent();
+        var source1 = new FakeRangedValueSource();
+        var source2 = new FakeRangedValueSource();
+
+        component.Source1 = source1;
+        component.Source2 = source2;
+
+        source1.ValueChanged += (_, _) => source2.Value = 20;
+
+        component.Value = 10;
+
+        Assert.Equal(20, component.Value);
+        Assert.Equal(20, source1.Value);
+        Assert.Equal(20, source2.Value);
+    }
+
+    [Fact]
+    public void SetRange_WhenValueChangedSubscriberChangesRange_RaisesEventsInConsistentOrder()
+    {
+        using var component = new RangedValueSynchronizerComponent();
+        var source = new FakeRangedValueSource();
+        component.Source1 = source;
+
+        component.Value = 75;
+
+        var events = new List<string>();
+
+        component.ValueChanged += (_, _) =>
+        {
+            events.Add("ValueChanged");
+
+            if (component.Maximum == 50)
+            {
+                component.SetRange(10, 20);
+            }
+        };
+
+        component.RangeChanged += (_, _) => events.Add("RangeChanged");
+
+        component.SetRange(0, 50);
+
+        Assert.Equal(10, component.Minimum);
+        Assert.Equal(20, component.Maximum);
+        Assert.Equal(20, component.Value);
+        Assert.Equal(20, source.Value);
+
+        Assert.Equal(
+            new[]
+            {
+                "ValueChanged",
+                "ValueChanged",
+                "RangeChanged",
+                "RangeChanged",
+            },
+            events);
+    }
+
+    [Fact]
     public void Dispose_DetachesBothSources()
     {
         var component = new RangedValueSynchronizerComponent();
