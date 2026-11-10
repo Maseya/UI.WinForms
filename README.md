@@ -2,6 +2,8 @@
 
 A collection of reusable Windows Forms controls for .NET.
 
+[![CI](https://github.com/Maseya/UI.WinForms/actions/workflows/ci.yml/badge.svg)][ci_yml]
+
 ## Overview
 
 TODO
@@ -120,3 +122,4 @@ For private inquiries, you can reach me at [spelwerdzrite@gmail.com][email].
 [profile]: https://github.com/bonimy
 [email]: mailto:spelwerdzrite@gmail.com
 [issues]: https://github.com/Maseya/UI.WinForms/issues
+[ci_yml]: https://github.com/Maseya/UI.WinForms/actions/workflows/ci.yml

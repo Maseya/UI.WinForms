@@ -1,0 +1,39 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    build-and-test:
+        name: Build and test
+        runs-on: windows-latest
+
+        env:
+            CI: true
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Set up .NET
+              uses: actions/setup-dotnet@v6
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Restore dependencies
+              run: dotnet restore Maseya.UI.WinForms.slnx
+
+            - name: Build solution
+              run: dotnet build Maseya.UI.WinForms.slnx --configuration Release --no-restore
+
+            - name: Run unit tests
+              run: dotnet test Maseya.UI.WinForms.slnx --configuration Release --no-build --no-restore --logger "console;verbosity=normal"
