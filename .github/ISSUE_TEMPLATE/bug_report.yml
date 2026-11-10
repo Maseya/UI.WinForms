@@ -1,0 +1,99 @@
+name: Bug Report
+description: Report unexpected behavior or a defect.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug!
+        Please provide as much detail as possible to help reproduce and
+        investigate the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the problem.
+      placeholder: Describe what happened.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide the steps needed to reproduce the issue.
+      placeholder: |
+        1. Create a ...
+        2. Set ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Additional Context
+      description: |
+        Include screenshots, exception messages, stack traces, or other
+        information that may help explain the issue.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: windows-version
+    attributes:
+      label: Windows Version
+      description: Which version of Windows are you using?
+      options:
+        - Windows 11
+        - Windows 10
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: dotnet-version
+    attributes:
+      label: .NET Version
+      description: Which .NET version are you targeting?
+      placeholder: "e.g. .NET 8.0"
+    validations:
+      required: false
+
+  - type: input
+    id: visual-studio-version
+    attributes:
+      label: Visual Studio Version
+      description: Which version of Visual Studio are you using?
+      placeholder: "e.g. Visual Studio 2022 17.12"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues for similar reports.
+          required: true
+        - label: I am using the latest available version of the library.
+          required: false
