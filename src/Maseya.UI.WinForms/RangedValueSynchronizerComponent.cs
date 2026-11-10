@@ -153,7 +153,7 @@ public class RangedValueSynchronizerComponent : Component, IRangedValueSource
 
         set
         {
-            SetValueInternal(Math.Clamp(value, Minimum, Maximum));
+            SetValueInternal(value);
         }
     }
 
