@@ -14,7 +14,7 @@ TODO
 
 ## Requirements
 
-- .NET 8.0
+- .NET 10.0
 - Windows
 
 ## Installation
@@ -38,8 +38,8 @@ TODO
 ### Prerequisites
 
 - Windows
-- Visual Studio 2022 or later
-- The .NET 8.0 SDK
+- Visual Studio 2026 or later
+- The .NET 10.0 SDK
 - Visual Studio's **.NET desktop development** workload
 
 ### Getting the Source
