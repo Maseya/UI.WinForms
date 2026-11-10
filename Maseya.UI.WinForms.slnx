@@ -1,3 +1,14 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="CHANGELOG.md" />
+    <File Path="CODE_OF_CONDUCT.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="LICENSE" />
+    <File Path="Maseya.UI.WinForms.slnx.licenseheader" />
+    <File Path="NOTICE" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="src/Maseya.UI.WinForms/Maseya.UI.WinForms.csproj" />
 </Solution>

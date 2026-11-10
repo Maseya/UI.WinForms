@@ -1,0 +1,38 @@
+
+extensions: designer.cs generated.cs
+extensions: .cs .cpp .h
+// <copyright file="%FileName%" organization="Maseya">
+//     Copyright (c) %CurrentYear% spel werdz rite (SWR).
+//     Licensed under the Mozilla Public License 2.0.
+//     See LICENSE in the project root for license information, or visit
+//     https://www.mozilla.org/MPL/2.0/.
+// </copyright>
+
+extensions: .aspx .ascx
+<%--
+<copyright file="%FileName%" organization="Maseya">
+    Copyright (c) %CurrentYear% spel werdz rite (SWR).
+    Licensed under the Mozilla Public License 2.0.
+    See LICENSE in the project root for license information, or visit
+    https://www.mozilla.org/MPL/2.0/.
+</copyright>
+
+--%>
+
+extensions: .vb
+'<copyright file="%FileName%" organization="Maseya">
+'    Copyright (c) %CurrentYear% spel werdz rite (SWR).
+'    Licensed under the Mozilla Public License 2.0.
+'    See LICENSE in the project root for license information, or visit
+'    https://www.mozilla.org/MPL/2.0/.
+'</copyright>
+
+extensions: .xml .config .xsd
+<!--
+<copyright file="%FileName%" organization="Maseya">
+    Copyright (c) %CurrentYear% spel werdz rite (SWR).
+    Licensed under the Mozilla Public License 2.0.
+    See LICENSE in the project root for license information, or visit
+    https://www.mozilla.org/MPL/2.0/.
+</copyright>
+-->
